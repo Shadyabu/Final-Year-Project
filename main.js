@@ -3,33 +3,19 @@ import WebGL from 'three/addons/capabilities/WebGL.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 
+
 if ( WebGL.isWebGLAvailable() ) {
+
+    // SETTING UP SCENE
     // creating new scene and camera
     const scene = new THREE.Scene(); 
-    const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 ); 
-    
+    const camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 100 ); 
+    camera.position.x = 100;
     // setting up renderer size and background color
     const renderer = new THREE.WebGLRenderer(); 
     renderer.setSize( window.innerWidth, window.innerHeight); 
     renderer.setClearColor(0xffffff);
     document.body.appendChild( renderer.domElement );
-    
-
-    var DJDeck;
-    // new loader
-    const loader = new GLTFLoader();
-    // loading in file
-    loader.load( '/Nur DJ Pult.glb', function ( gltf ) {
-        // adding rendering to scene
-        DJDeck = gltf.scene
-        DJDeck.rotateY(0.035);
-        scene.add( DJDeck );
-    }, undefined, function ( error ) {
-    
-        console.error( error );
-    
-    } );
-
     // setting up light color and strength
     const light = new THREE.PointLight( 0xffffff, 100, 0 );
     // setting up light location
@@ -37,88 +23,103 @@ if ( WebGL.isWebGLAvailable() ) {
     // adding light to scene
     scene.add( light );
 
-    
     // create an AudioListener and add it to the camera
     const listener = new THREE.AudioListener();
     camera.add( listener );
     // create global audio source
-    const sound = new THREE.PositionalAudio( listener );
+    const sound = new THREE.Audio( listener );
     // load a sound
     const audioLoader = new THREE.AudioLoader();
     audioLoader.load( '/audioTest.mp3', function( buffer ) {
         sound.setBuffer(buffer);
-        sound.setRefDistance(10);
         sound.play(0);
         sound.setLoop(true);
     }); 
+    
 
-    // creating a speaker object
-    const sphere = new THREE.SphereGeometry( 0.1, 64, 32, 0, 6.283185307179586, 0, 6.283185307179586);
-    const material = new THREE.MeshPhongMaterial( { color: 0xffffff } );
+    //Loading in DJ Deck
+    var DJDeck;
+    // new loader
+    const loader = new GLTFLoader();
+    // loading in file
+    loader.load( '/Deck-plain-1.glb', function ( gltf ) {
+        // adding rendering to scene
+        DJDeck = gltf.scene
+        scene.add( DJDeck );
+    }, undefined, function ( error ) {
+        console.error( error );
+    } );
 
-    const speakerLeft = new THREE.Mesh( sphere, material );
-    speakerLeft.position.set( 1.5, 0, 1.5);
-    scene.add( speakerLeft );
+    var DJDisk;
+    loader.load( '/disk.glb', function ( gltf ) {
+        DJDisk = gltf.scene;
+        DJDisk.translateX(0.439);
+        DJDisk.translateZ(0.018)
+        scene.add( DJDisk );
 
-    const speakerRight = new THREE.Mesh( sphere, material );
-    speakerRight.position.set( -1.5, 0, 1.5);
-    scene.add( speakerRight );
 
-    speakerLeft.add(sound);
-    speakerRight.add(sound);
 
-    // Create a Three.js slider handle
-    const sliderGeometry = new THREE.BoxGeometry(0.2, 0.04, 0.02);
-    const sliderMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
-    const sliderHandle = new THREE.Mesh(sliderGeometry, sliderMaterial);
-    sliderHandle.position.set(-0.05, 0.1, 1.2); // Adjust the position as needed
-    scene.add(sliderHandle);
 
-    // Create a Three.js slider track
-    const sliderTrackGeometry = new THREE.BoxGeometry(1, 0.02, 0.2);
-    const sliderTrackMaterial = new THREE.MeshPhongMaterial({ color: 0x0088ff });
-    const sliderTrack = new THREE.Mesh(sliderTrackGeometry, sliderTrackMaterial);
-    sliderTrack.position.set(-0.05, 0.1, 1.2); // Adjust the position as needed
-    scene.add(sliderTrack);
+        // ... (your existing code)
 
-    // Event listener for the slider handle
-    let isDragging = false;
+// Assuming camera, renderer and scene are already defined
+var isMouseDown = false;
+var prevMousePos = { x: 0, y: 0 };
+var raycaster = new THREE.Raycaster(); // create once
+var mouse = new THREE.Vector2(); // create once
+var initialRotation = 0;
+var lastTime = 0;
 
-    const handleMouseDown = function (event) {
-        isDragging = true;
-    };
+renderer.domElement.addEventListener('mousedown', function(e) {
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
-    const handleMouseUp = function (event) {
-        isDragging = false;
-    };
+    raycaster.setFromCamera(mouse, camera);
+    var intersects = raycaster.intersectObject(DJDisk);
 
-    const handleMouseMove = function (event) {
-        if (isDragging) {
-            // Calculate the normalized position of the slider handle within the slider track
-            const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-            const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+    if (intersects.length > 0) {
+        isMouseDown = true;
+        prevMousePos.x = e.clientX;
+        prevMousePos.y = e.clientY;
+        initialRotation = DJDisk.rotation.y;
+        lastTime = sound.context.currentTime;
+    }
+});
 
-            // Raycasting to determine the intersection point between the mouse and the slider track
-            const raycaster = new THREE.Raycaster();
-            const mouse = new THREE.Vector2(mouseX, mouseY);
-            raycaster.setFromCamera(mouse, camera);
+renderer.domElement.addEventListener('mouseup', function() {
+    isMouseDown = false;
+});
 
-            const intersects = raycaster.intersectObject(sliderTrack);
+renderer.domElement.addEventListener('mousemove', function(e) {
+    if (isMouseDown) {
+        var dx = e.clientX - prevMousePos.x;
+        DJDisk.rotation.y += dx * 0.01; // Adjust rotation speed as needed
+        prevMousePos.x = e.clientX;
+        prevMousePos.y = e.clientY;
 
-            if (intersects.length > 0) {
-                // Set the position of the slider handle based on the intersection point
-                sliderHandle.position.x = intersects[0].point.x;
+        // Calculate the change in rotation
+        var deltaRotation = DJDisk.rotation.y - initialRotation;
 
-                // Adjust the volume based on the handle position
-                const volume = (sliderHandle.position.x + 0.5) / 1;
-                sound.setVolume(volume);
-            }
+        // Use the change in rotation to calculate the new playback time
+        var newTime = lastTime + deltaRotation * 10; // Adjust the multiplier as needed
+
+        // Make sure the new time is within the duration of the audio file
+        newTime = Math.max(0, Math.min(newTime, sound.buffer.duration));
+
+        // Set the new playback time
+        if (sound.isPlaying) {
+            sound.stop();
         }
-    };
+        sound.offset = newTime;
+        sound.play();
+    }
+});
 
-    window.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mouseup', handleMouseUp);
-    window.addEventListener('mousemove', handleMouseMove);
+// ... (your existing code)
+
+    }, undefined, function ( error ) {
+        console.error( error );
+    } );
 
     // Setting up the camera
     camera.position.set( 0, 2.4, -0.5 );
