@@ -120,6 +120,7 @@ if ( WebGL.isWebGLAvailable() ) {
             var raycaster = new THREE.Raycaster();
             var mouse = new THREE.Vector2();
     
+            // written with the help of Copilot
             function onSkipButtonClick(event) {
                 mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -135,6 +136,7 @@ if ( WebGL.isWebGLAvailable() ) {
                 }
             }
             window.addEventListener('click', onSkipButtonClick, false);
+            // end copilot
         }, undefined, function(error) {
             console.error(error);
         });
@@ -162,12 +164,14 @@ if ( WebGL.isWebGLAvailable() ) {
             var raycaster = new THREE.Raycaster();
             var mouse = new THREE.Vector2();
     
+            // written with help of copilot
             function onPreviousButtonClick(event) {
                 mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     
                 raycaster.setFromCamera(mouse, camera);
                 var intersects = raycaster.intersectObjects([previousButton]);
+            //end of copilot
                 if (intersects.length > 0) {
                     // stop the current sound and switch to the other one
                     soundObject.currentSound.stop();
@@ -230,6 +234,7 @@ if ( WebGL.isWebGLAvailable() ) {
             var initialRotation = 0;
             var lastTime = 0;
 
+            // Written with the help of Copilot
             renderer.domElement.addEventListener('mousedown', function(e) {
                 mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -268,6 +273,7 @@ if ( WebGL.isWebGLAvailable() ) {
                     soundObject.currentSound.play();
                 }
             });
+            //end of Copilot
         }, undefined, function ( error ) {
             console.error( error );
         } );
@@ -302,6 +308,7 @@ if ( WebGL.isWebGLAvailable() ) {
             var raycaster = new THREE.Raycaster(); 
             var mouse = new THREE.Vector2(); 
         
+            // Written with the help of Copilot
             renderer.domElement.addEventListener('mousedown', function(e) {
                 mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -331,6 +338,7 @@ if ( WebGL.isWebGLAvailable() ) {
                     prevMousePos.y = e.clientY;
                 }
             });
+            // end of Copilot
         }, undefined, function ( error ) {
             console.error( error );
         } );
@@ -364,6 +372,7 @@ if ( WebGL.isWebGLAvailable() ) {
             var raycaster = new THREE.Raycaster();
             var mouse = new THREE.Vector2();
     
+            // written with help of copilot
             function onMouseClick(event) {
                 mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -371,6 +380,7 @@ if ( WebGL.isWebGLAvailable() ) {
                 raycaster.setFromCamera(mouse, camera);
                 var intersects = raycaster.intersectObjects([play]);
                 if (intersects.length > 0) {
+                    // end of copilot
                     if (soundObject.currentSound.isPlaying) {
                         intersects[0].object.position.y = 0.5882995338439941;
                         console.log(intersects[0].object.position.y);
@@ -416,6 +426,7 @@ if ( WebGL.isWebGLAvailable() ) {
     
             var controls = new DragControls([volume], camera, renderer.domElement);
     
+            // written with help of Copilot
             controls.addEventListener('dragstart', function (event) {
                 initialPosition.copy(event.object.position);
             });
@@ -431,6 +442,7 @@ if ( WebGL.isWebGLAvailable() ) {
                 var volumeLevel = calculateVolume(event.object.position.z, minZ, maxZ);
                 soundObject.currentSound.setVolume(volumeLevel);
             });
+            // end of Copilot
         }, undefined, function ( error ) {
             console.error( error );
         } );
@@ -469,6 +481,7 @@ if ( WebGL.isWebGLAvailable() ) {
     
             var controls = new DragControls([tempo], camera, renderer.domElement);
     
+            // written with help of copilot
             controls.addEventListener('dragstart', function (event) {
                 initialPosition.copy(event.object.position);
             });
@@ -479,6 +492,7 @@ if ( WebGL.isWebGLAvailable() ) {
                 event.object.position.x = initialPosition.x;
                 event.object.position.y = initialPosition.y;
                 event.object.position.z = Math.max(minZ, Math.min(maxZ, event.object.position.z));
+                // end copilot
                 var newPlaybackRate = calculatePlaybackRate(event.object.position.z, minZ, maxZ);
                 soundObject.currentSound.setPlaybackRate(newPlaybackRate);
     
