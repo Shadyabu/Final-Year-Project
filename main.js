@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import WebGL from 'three/addons/capabilities/WebGL.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DragControls } from 'three/examples/jsm/controls/DragControls.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 
 
@@ -11,7 +12,7 @@ if ( WebGL.isWebGLAvailable() ) {
     // creating new scene and camera
     const scene = new THREE.Scene(); 
     const camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.1, 100 ); 
-    camera.position.x = 100;
+    camera.position.x = 1;
     // setting up renderer size and background color
     const renderer = new THREE.WebGLRenderer(); 
     renderer.setSize( window.innerWidth, window.innerHeight); 
@@ -20,25 +21,27 @@ if ( WebGL.isWebGLAvailable() ) {
     // setting up light color and strength
     const light = new THREE.PointLight( 0xffffff, 100, 0 );
     // setting up light location
-    light.position.set( 0, 10, 0 );
+    light.position.set( 0, 8, 0 );
     // adding light to scene
     scene.add( light );
-    // create an AudioListener and add it to the camera
-    const listener = new THREE.AudioListener();
-    camera.add( listener );
     // create a new loader to load in 3D models
     const loader = new GLTFLoader();
 
-
+    const controls = new OrbitControls( camera, renderer.domElement );
+    controls.enableZoom = true;
+    controls.enableRotate = false;
+    controls.maxDistance = 7;
+    controls.minDistance = 1; 
 
 
     // Audio Source *************************************************************
-    //maybe this mechanism is faulty too
+
+    // create an AudioListener and add it to the camera
+    const listener = new THREE.AudioListener();
+    camera.add( listener );
 
     // load a sound
     const audioLoader = new THREE.AudioLoader();
-
-    // create global audio sources
 
     // load the sounds
     const soundsRight = [
@@ -91,11 +94,44 @@ if ( WebGL.isWebGLAvailable() ) {
     });
 
     // keep track of which sound is currently playing
-    var soundObjectLeft = { currentSound: soundsRight[0], currentIndex: 0, sounds: soundsLeft };
-    var soundObjectRight = { currentSound: soundsLeft[0], currentIndex: 0, sounds: soundsRight };
+    var soundObjectLeft = { currentIndex: 0, sounds: soundsLeft };
+    var soundObjectRight = { currentIndex: 0, sounds: soundsRight };
 
+    //create EQ Filters
+    var lowShelfFilter = listener.context.createBiquadFilter();
+    lowShelfFilter.type = "lowshelf";
+    lowShelfFilter.frequency.value = 300;
+    lowShelfFilter.connect(listener.context.destination);
 
+    var highShelfFilter = listener.context.createBiquadFilter();
+    highShelfFilter.type = "highshelf";
+    highShelfFilter.frequency.value = 5000;
+    highShelfFilter.connect(listener.context.destination);
+
+    var peakingFilter = listener.context.createBiquadFilter();
+    peakingFilter.type = "peaking";
+    peakingFilter.frequency.value = 1000;
+    peakingFilter.connect(listener.context.destination);
+
+    // needed to compensate for gain in filters
+    var gainNode = listener.context.createGain();
+    gainNode.gain.value= -3;
+    gainNode.connect(listener.context.destination);
+
+    //Add Filters to Audio
+    var filters = [peakingFilter, highShelfFilter, lowShelfFilter, gainNode]
+    for (let i = 0; i < soundsLeft.length; i++) { 
+        soundsLeft[i].setFilters(filters);
+    }
+
+    for (let i = 0; i < soundsRight.length; i++) { 
+        soundsRight[i].setFilters(filters);
+    }
+      
     // *************************************************************************
+
+
+
 
 
     // Skip Button *************************************************************
@@ -111,7 +147,7 @@ if ( WebGL.isWebGLAvailable() ) {
     loadSkip(skipButtonRight, skipButtonRightX, skipButtonRightZ, soundObjectRight)
 
     function loadSkip(skipButton, x, z, soundObject){
-        loader.load('3D-renderings/skip.glb', function(gltf) {
+        loader.load('3D-renderings/skip-texture.glb', function(gltf) {
             skipButton = gltf.scene;
             skipButton.translateX(x);
             skipButton.translateZ(z);
@@ -128,11 +164,18 @@ if ( WebGL.isWebGLAvailable() ) {
                 raycaster.setFromCamera(mouse, camera);
                 var intersects = raycaster.intersectObjects([skipButton]);
                 if (intersects.length > 0) {
-                    // stop the current sound and switch to the other one
-                    soundObject.currentSound.stop();
+                    var speed = soundObject.sounds[soundObject.currentIndex].getPlaybackRate();
+                    var volume = soundObject.sounds[soundObject.currentIndex].getVolume();
+
+                    // this is so weird, i don't know why but the gain node deactivates 
+                    // if volume is not equal to 0. Took a lot of testing but at least it works
+                    soundObject.sounds[soundObject.currentIndex].setVolume(0);
+                    soundObject.sounds[soundObject.currentIndex].stop();
                     soundObject.currentIndex = (soundObject.currentIndex + 1) % soundObject.sounds.length;
-                    soundObject.currentSound = soundObject.sounds[soundObject.currentIndex];
-                    soundObject.currentSound.play();
+                    soundObject.sounds[soundObject.currentIndex] = soundObject.sounds[soundObject.currentIndex];
+                    soundObject.sounds[soundObject.currentIndex].setPlaybackRate(speed);
+                    soundObject.sounds[soundObject.currentIndex].setVolume(volume);
+                    soundObject.sounds[soundObject.currentIndex].play();
                 }
             }
             window.addEventListener('click', onSkipButtonClick, false);
@@ -155,7 +198,7 @@ if ( WebGL.isWebGLAvailable() ) {
     loadPrevious(previousButtonRight, previousButtonRightX, previousButtonRightZ, soundObjectRight)
 
     function loadPrevious(previousButton, x, z, soundObject){
-        loader.load('3D-renderings/skip.glb', function(gltf) {
+        loader.load('3D-renderings/previous-texture.glb', function(gltf) {
             previousButton = gltf.scene;
             previousButton.translateX(x);
             previousButton.translateZ(z);
@@ -173,14 +216,19 @@ if ( WebGL.isWebGLAvailable() ) {
                 var intersects = raycaster.intersectObjects([previousButton]);
             //end of copilot
                 if (intersects.length > 0) {
-                    // stop the current sound and switch to the other one
-                    soundObject.currentSound.stop();
+                    var speed = soundObject.sounds[soundObject.currentIndex].getPlaybackRate();
+                    var volume = soundObject.sounds[soundObject.currentIndex].getVolume();
+                    
+                    soundObject.sounds[soundObject.currentIndex].setVolume(0);
+                    soundObject.sounds[soundObject.currentIndex].stop();
                     if (soundObject.currentIndex == 0) {
                         soundObject.currentIndex = soundObject.sounds.length;
                     }
                     soundObject.currentIndex--;
-                    soundObject.currentSound = soundObject.sounds[soundObject.currentIndex];
-                    soundObject.currentSound.play();
+                    soundObject.sounds[soundObject.currentIndex] = soundObject.sounds[soundObject.currentIndex];
+                    soundObject.sounds[soundObject.currentIndex].setPlaybackRate(speed);
+                    soundObject.sounds[soundObject.currentIndex].setVolume(volume);
+                    soundObject.sounds[soundObject.currentIndex].play();
                 }
             }
             window.addEventListener('click', onPreviousButtonClick, false);
@@ -196,15 +244,17 @@ if ( WebGL.isWebGLAvailable() ) {
 
     // Loading in DJ Deck
     var DJDeck;
-    // new loader
+    const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
     // loading in file
-    loader.load( '3D-renderings/Deck-plain-1.glb', function ( gltf ) {
+    loader.load( '3D-renderings/Deck-plain-3.glb', function ( gltf ) {
         // adding rendering to scene
         DJDeck = gltf.scene
+
         scene.add( DJDeck );
     }, undefined, function ( error ) {
         console.error( error );
     } );
+
     // *************************************************************************
 
 
@@ -247,7 +297,7 @@ if ( WebGL.isWebGLAvailable() ) {
                     prevMousePos.x = e.clientX;
                     prevMousePos.y = e.clientY;
                     initialRotation = DJDisk.rotation.y;
-                    lastTime = sound.context.currentTime;
+                    lastTime = soundObject.sounds[soundObject.currentIndex].context.currentTime;
                 }
             });
             renderer.domElement.addEventListener('mouseup', function() {
@@ -264,13 +314,13 @@ if ( WebGL.isWebGLAvailable() ) {
                     // Use the change in rotation to calculate the new playback time
                     var newTime = lastTime - deltaRotation * 10; // Adjust the multiplier as needed
                     // Make sure the new time is within the duration of the audio file
-                    newTime = Math.max(0, Math.min(newTime, soundObject.currentSound.buffer.duration));
+                    newTime = Math.max(0, Math.min(newTime, soundObject.sounds[soundObject.currentIndex].buffer.duration));
                     // Set the new playback time
-                    if (soundObject.currentSound.isPlaying) {
-                        soundObject.currentSound.stop();
+                    if (soundObject.sounds[soundObject.currentIndex].isPlaying) {
+                        soundObject.sounds[soundObject.currentIndex].stop();
                     }
-                    soundObject.currentSound.offset = newTime;
-                    soundObject.currentSound.play();
+                    soundObject.sounds[soundObject.currentIndex].offset = newTime;
+                    soundObject.sounds[soundObject.currentIndex].play();
                 }
             });
             //end of Copilot
@@ -288,16 +338,39 @@ if ( WebGL.isWebGLAvailable() ) {
     var knobLeftMid;
     var knobLeftMidX = -0.001
     var knobLeftMidZ = 0.115
-    loadKnob(knobLeftMid, knobLeftMidX, knobLeftMidZ, soundObjectLeft)
+    loadKnob(knobLeftMid, knobLeftMidX, knobLeftMidZ, peakingFilter)
 
     var knobRightMid;
     var knobRightMidX = -0.102
     var knobRightMidZ = 0.113
-    loadKnob(knobRightMid, knobRightMidX, knobRightMidZ, soundObjectRight)
+    loadKnob(knobRightMid, knobRightMidX, knobRightMidZ, peakingFilter)
+
+    var knobRightHigh;
+    var knobRightHighX = -0.102
+    var knobRightHighZ = 0.180
+    loadKnob(knobRightHigh, knobRightHighX, knobRightHighZ, highShelfFilter)
+    
+    var knobLeftHigh;
+    var knobLeftHighX = -0.001
+    var knobLeftHighZ = 0.180
+    loadKnob(knobLeftHigh, knobLeftHighX, knobLeftHighZ, highShelfFilter)
+    
+    var knobRightLow;
+    var knobRightLowX = -0.102
+    var knobRightLowZ = 0.045
+    loadKnob(knobRightLow, knobRightLowX, knobRightLowZ, lowShelfFilter)
+    
+    var knobLeftLow;
+    var knobLeftLowX = -0.001
+    var knobLeftLowZ = 0.045
+    loadKnob(knobLeftLow, knobLeftLowX, knobLeftLowZ, lowShelfFilter)
+    
     function mapRange(value, low1, high1, low2, high2) {
         return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
     }
-    function loadKnob(knob, x, z, soundObject) {
+
+
+    function loadKnob(knob, x, z, filter) {
         loader.load( '3D-renderings/knob.glb', function ( gltf ) {
             knob = gltf.scene
             knob.translateX(x);
@@ -307,7 +380,7 @@ if ( WebGL.isWebGLAvailable() ) {
             var prevMousePos = { x: 0, y: 0 };
             var raycaster = new THREE.Raycaster(); 
             var mouse = new THREE.Vector2(); 
-        
+
             // Written with the help of Copilot
             renderer.domElement.addEventListener('mousedown', function(e) {
                 mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -333,6 +406,12 @@ if ( WebGL.isWebGLAvailable() ) {
                     var newRotation = knob.rotation.y + dx * -0.05;
                     if (newRotation <= 2.75 && newRotation >= -2.75) {
                         knob.rotation.y = newRotation;
+
+                        var minGain = -40;
+                        var maxGain = 40;
+                        var newGain = mapRange(newRotation, -2.75, 2.75, maxGain, minGain);
+
+                        filter.gain.value = newGain;
                     }
                     prevMousePos.x = e.clientX;
                     prevMousePos.y = e.clientY;
@@ -381,18 +460,79 @@ if ( WebGL.isWebGLAvailable() ) {
                 var intersects = raycaster.intersectObjects([play]);
                 if (intersects.length > 0) {
                     // end of copilot
-                    if (soundObject.currentSound.isPlaying) {
-                        intersects[0].object.position.y = 0.5882995338439941;
-                        console.log(intersects[0].object.position.y);
-                        soundObject.currentSound.pause(); 
+                    if (soundObject.sounds[soundObject.currentIndex].isPlaying) {
+                        intersects[0].object.position.y = 0.5912995338439941;
+                        soundObject.sounds[soundObject.currentIndex].pause(); 
                     } else {
-                        intersects[0].object.position.y = 0.5912995338439941; 
-                        soundObject.currentSound.play(); 
-                        console.log(soundObject.currentSound.gain)
+                        intersects[0].object.position.y = 0.5882995338439941; 
+                        soundObject.sounds[soundObject.currentIndex].play(); 
                     }
                 }
             }
             window.addEventListener('click', onMouseClick, false);
+        }, undefined, function ( error ) {
+            console.error( error );
+        } );
+    }
+    
+    // *************************************************************************
+
+
+    // Cue button ************************************************************
+    var cueButtonLeft;
+    var cueButtonLeftX = 0.66;
+    var cueButtonLeftZ = -0.181;
+    cueButton(cueButtonLeft, cueButtonLeftX, cueButtonLeftZ, soundObjectLeft)
+
+    var cueButtonRight;
+    var cueButtonRightX = -0.324;
+    var cueButtonRightZ = -0.181;
+    cueButton(cueButtonRight, cueButtonRightX, cueButtonRightZ, soundObjectRight)
+
+    function cueButton(cue, x, z, soundObject){
+        loader.load( '3D-renderings/cue.glb', function ( gltf ) {
+            // adding rendering to scene
+            cue = gltf.scene
+            scene.add( cue );
+            cue.translateX(x);
+            cue.translateZ(z)
+            cue.translateY(0.014);
+
+            var raycaster = new THREE.Raycaster();
+            var mouse = new THREE.Vector2();
+            var song;
+
+            function onMouseDown(event) {
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+                //copying over the sounds array.
+                song = [...soundObject.sounds];
+
+                raycaster.setFromCamera(mouse, camera);
+                var intersects = raycaster.intersectObjects([cue]);
+                if (intersects.length > 0) {
+                    intersects[0].object.position.y = 0.574; 
+                    song[soundObject.currentIndex].play(); 
+                }
+            }
+    
+            function onMouseUp(event) {
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    
+                raycaster.setFromCamera(mouse, camera);
+                var intersects = raycaster.intersectObjects([cue]);
+                if (intersects.length > 0) {
+                    intersects[0].object.position.y = 0.577;
+                    song[soundObject.currentIndex].stop();
+                }
+                song = 0;
+            }
+    
+            window.addEventListener('mousedown', onMouseDown, false);
+            window.addEventListener('mouseup', onMouseUp, false);
+
         }, undefined, function ( error ) {
             console.error( error );
         } );
@@ -440,7 +580,8 @@ if ( WebGL.isWebGLAvailable() ) {
                 event.object.position.y = initialPosition.y;
                 event.object.position.z = Math.max(minZ, Math.min(maxZ, event.object.position.z));
                 var volumeLevel = calculateVolume(event.object.position.z, minZ, maxZ);
-                soundObject.currentSound.setVolume(volumeLevel);
+                soundObject.sounds[soundObject.currentIndex].setVolume(volumeLevel);
+                console.log(soundObject.sounds[soundObject.currentIndex].getVolume());
             });
             // end of Copilot
         }, undefined, function ( error ) {
@@ -494,7 +635,7 @@ if ( WebGL.isWebGLAvailable() ) {
                 event.object.position.z = Math.max(minZ, Math.min(maxZ, event.object.position.z));
                 // end copilot
                 var newPlaybackRate = calculatePlaybackRate(event.object.position.z, minZ, maxZ);
-                soundObject.currentSound.setPlaybackRate(newPlaybackRate);
+                soundObject.sounds[soundObject.currentIndex].setPlaybackRate(newPlaybackRate);
     
             });
         }, undefined, function ( error ) {
