@@ -1,9 +1,8 @@
-import * as THREE from 'three'; 
+import * as THREE from 'three';
 import WebGL from 'three/addons/capabilities/WebGL.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DragControls } from 'three/examples/jsm/controls/DragControls.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-
 
 
 if ( WebGL.isWebGLAvailable() ) {
@@ -26,7 +25,7 @@ if ( WebGL.isWebGLAvailable() ) {
     scene.add( light );
     // create a new loader to load in 3D models
     const loader = new GLTFLoader();
-
+    // zoom feature
     const controls = new OrbitControls( camera, renderer.domElement );
     controls.enableZoom = true;
     controls.enableRotate = false;
@@ -35,7 +34,6 @@ if ( WebGL.isWebGLAvailable() ) {
 
 
     // Audio Source *************************************************************
-
     // create an AudioListener and add it to the camera
     const listener = new THREE.AudioListener();
     camera.add( listener );
@@ -43,7 +41,7 @@ if ( WebGL.isWebGLAvailable() ) {
     // load a sound
     const audioLoader = new THREE.AudioLoader();
 
-    // load the sounds
+    // create sounds array
     const soundsRight = [
         new THREE.Audio(listener),
         new THREE.Audio(listener),
@@ -51,7 +49,6 @@ if ( WebGL.isWebGLAvailable() ) {
         new THREE.Audio(listener),
         new THREE.Audio(listener)
     ];
-
     const soundsLeft = [
         new THREE.Audio(listener),
         new THREE.Audio(listener),
@@ -59,7 +56,22 @@ if ( WebGL.isWebGLAvailable() ) {
         new THREE.Audio(listener),
         new THREE.Audio(listener)
     ];
-    
+    // create sound names array
+    const soundsRightNames = [
+        "audioTest",
+        "audioTest2",
+        "audioTest3",
+        "audioTest4",
+        "audioTest5"
+    ]
+    const soundsLeftNames = [
+        "audioTest",
+        "audioTest2",
+        "audioTest3",
+        "audioTest4",
+        "audioTest5"
+    ]
+
     // load the sounds
     audioLoader.load('/audioTest.mp3', function(buffer) {
         soundsRight[0].setBuffer(buffer);
@@ -93,7 +105,7 @@ if ( WebGL.isWebGLAvailable() ) {
         soundsLeft[4].setBuffer(buffer);
     });
 
-    // keep track of which sound is currently playing
+    // soundObject to pass to functions and keep track of what sound is playing
     var soundObjectLeft = { currentIndex: 0, sounds: soundsLeft };
     var soundObjectRight = { currentIndex: 0, sounds: soundsRight };
 
@@ -176,6 +188,8 @@ if ( WebGL.isWebGLAvailable() ) {
                     soundObject.sounds[soundObject.currentIndex].setPlaybackRate(speed);
                     soundObject.sounds[soundObject.currentIndex].setVolume(volume);
                     soundObject.sounds[soundObject.currentIndex].play();
+                    rightSongDiv.textContent = "song playing: " + soundsRightNames[soundObjectRight.currentIndex];
+                    leftSongDiv.textContent = "song playing: " + soundsLeftNames[soundObjectLeft.currentIndex];
                 }
             }
             window.addEventListener('click', onSkipButtonClick, false);
@@ -218,7 +232,7 @@ if ( WebGL.isWebGLAvailable() ) {
                 if (intersects.length > 0) {
                     var speed = soundObject.sounds[soundObject.currentIndex].getPlaybackRate();
                     var volume = soundObject.sounds[soundObject.currentIndex].getVolume();
-                    
+
                     soundObject.sounds[soundObject.currentIndex].setVolume(0);
                     soundObject.sounds[soundObject.currentIndex].stop();
                     if (soundObject.currentIndex == 0) {
@@ -229,6 +243,8 @@ if ( WebGL.isWebGLAvailable() ) {
                     soundObject.sounds[soundObject.currentIndex].setPlaybackRate(speed);
                     soundObject.sounds[soundObject.currentIndex].setVolume(volume);
                     soundObject.sounds[soundObject.currentIndex].play();
+                    rightSongDiv.textContent = "song playing: " + soundsRightNames[soundObjectRight.currentIndex];
+                    leftSongDiv.textContent = "song playing: " + soundsLeftNames[soundObjectLeft.currentIndex];
                 }
             }
             window.addEventListener('click', onPreviousButtonClick, false);
@@ -646,6 +662,31 @@ if ( WebGL.isWebGLAvailable() ) {
     // *************************************************************************
 
 
+
+    // text loader *************************************************************
+    // function which displays a message on screen, paremeters: message, name of the class of div (for css changes) and whether the message should disappear or not
+    function showPopupMessage(message, className, timeOut) {
+        var popupDiv = document.createElement("div");
+        popupDiv.textContent = message;
+        popupDiv.classList.add(className);
+        document.body.appendChild(popupDiv);
+        if (timeOut){
+            setTimeout(function() {
+                document.body.removeChild(popupDiv);
+            }, 4000);
+        }
+        return popupDiv;
+    }
+
+    // message when opening up the program
+    const introMessage = "This is an interactive DJ Controller. Have a look and explore curated music.\nExplore the interactive features through the bright and raised components.";
+    showPopupMessage(introMessage, "popup-message", true);
+
+    // song names displayed at bottom of screen 
+    var rightSongDiv = showPopupMessage("song playing: " + soundsRightNames[soundObjectRight.currentIndex], "right-song", false);
+    var leftSongDiv = showPopupMessage("song playing: " + soundsLeftNames[soundObjectLeft.currentIndex], "left-song", false);  
+
+    // *************************************************************************
 
 
 

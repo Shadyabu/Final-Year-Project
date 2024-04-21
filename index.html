@@ -6,11 +6,17 @@
 		<style>
 			body { margin: 0; }
 		</style>
+			<link href='https://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet'>
 	</head>
 	<body>
 		<script type="module" src="/main.js"></script>
 		<script src="https://threejs.org/examples/js/controls/DragControls.js"></script>
-
+		<img src="41943.png" id="helpIcon" class="help-icon" alt="Help Icon">
+		<script>
+			document.getElementById('helpIcon').addEventListener('click', function() {
+				alert('Only the bright and the raised components work. (Disk, tempo, volume, EQ knobs, play, cue, skip and previous)');
+			});
+		</script>
 	</body>
 
 	<style>
@@ -23,5 +29,54 @@
 	display:block;
 	color:white
 }
+
+	.popup-message {
+		position: fixed;
+		left: 0;
+		right: 0;
+		top: 50%;
+		text-align: center;
+		transform: translateY(-50%);
+		color: black;
+		padding: 20%;
+		font-size: 2em;
+		z-index: 1000;
+		font-family: 'Montserrat';
+	}
+	.left-song {
+		position: fixed;
+		left: 0;
+		right: 35%;
+		top: 90%;
+		text-align: center;
+		transform: translateY(-50%);
+		color: black;
+		padding: 3%;
+		font-size: 2em;
+		z-index: 1000;
+		font-family: 'Montserrat';
+	}
+	.right-song {
+		position: fixed;
+		left: 45%;
+		right: 0;
+		top: 90%;
+		text-align: center;
+		transform: translateY(-50%);
+		color: black;
+		padding: 3%;
+		font-size: 2em;
+		z-index: 1000;
+		font-family: 'Montserrat';
+	}
+	.help-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50px; /* Adjust as needed */
+    height: 50px; /* Adjust as needed */
+    cursor: pointer;
+	padding: 10px;
+	}
 	</style>
 </html>
