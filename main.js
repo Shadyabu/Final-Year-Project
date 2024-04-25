@@ -20,7 +20,7 @@ if ( WebGL.isWebGLAvailable() ) {
     // setting up light color and strength
     const light = new THREE.PointLight( 0xffffff, 100, 0 );
     // setting up light location
-    light.position.set( 0, 8, 0 );
+    light.position.set( 0, 7, 0 );
     // adding light to scene
     scene.add( light );
     // create a new loader to load in 3D models
@@ -29,43 +29,45 @@ if ( WebGL.isWebGLAvailable() ) {
     const controls = new OrbitControls( camera, renderer.domElement );
     controls.enableZoom = true;
     controls.enableRotate = false;
-    controls.maxDistance = 7;
+    controls.maxDistance = 5;
     controls.minDistance = 1; 
 
 
     // Audio Source *************************************************************
     // create an AudioListener and add it to the camera
-    const listener = new THREE.AudioListener();
-    camera.add( listener );
+    const listenerLeft = new THREE.AudioListener();
+    camera.add( listenerLeft );
+    const listenerRight = new THREE.AudioListener();
+    camera.add( listenerRight );
 
     // load a sound
     const audioLoader = new THREE.AudioLoader();
 
     // create sounds array
     const soundsRight = [
-        new THREE.Audio(listener),
-        new THREE.Audio(listener),
-        new THREE.Audio(listener),
-        new THREE.Audio(listener),
-        new THREE.Audio(listener)
+        new THREE.Audio(listenerRight),
+        new THREE.Audio(listenerRight),
+        new THREE.Audio(listenerRight),
+        new THREE.Audio(listenerRight),
+        new THREE.Audio(listenerRight)
     ];
     const soundsLeft = [
-        new THREE.Audio(listener),
-        new THREE.Audio(listener),
-        new THREE.Audio(listener),
-        new THREE.Audio(listener),
-        new THREE.Audio(listener)
+        new THREE.Audio(listenerLeft),
+        new THREE.Audio(listenerLeft),
+        new THREE.Audio(listenerLeft),
+        new THREE.Audio(listenerLeft),
+        new THREE.Audio(listenerLeft)
     ];
     // create sound names array
     const soundsRightNames = [
-        "audioTest",
+        "Dont Care (prod. ariritfm) - YT",
         "audioTest2",
         "audioTest3",
         "audioTest4",
         "audioTest5"
     ]
     const soundsLeftNames = [
-        "audioTest",
+        "tiffany - shadybabey",
         "audioTest2",
         "audioTest3",
         "audioTest4",
@@ -73,7 +75,7 @@ if ( WebGL.isWebGLAvailable() ) {
     ]
 
     // load the sounds
-    audioLoader.load('/audioTest.mp3', function(buffer) {
+    audioLoader.load('songs/Dont Care (prod ariritfm).mp3', function(buffer) {
         soundsRight[0].setBuffer(buffer);
     });
     audioLoader.load('/audioTest2.mp3', function(buffer) {
@@ -89,7 +91,7 @@ if ( WebGL.isWebGLAvailable() ) {
         soundsRight[4].setBuffer(buffer);
     });
 
-    audioLoader.load('/audioTest.mp3', function(buffer) {
+    audioLoader.load('songs/tiffany-143bpm Cmin-(@shady_._._).wav', function(buffer) {
         soundsLeft[0].setBuffer(buffer);
     });
     audioLoader.load('/audioTest2.mp3', function(buffer) {
@@ -110,49 +112,131 @@ if ( WebGL.isWebGLAvailable() ) {
     var soundObjectRight = { currentIndex: 0, sounds: soundsRight };
 
     //create EQ Filters
-    var lowShelfFilter = listener.context.createBiquadFilter();
-    lowShelfFilter.type = "lowshelf";
-    lowShelfFilter.frequency.value = 300;
-    lowShelfFilter.connect(listener.context.destination);
+    var lowShelfFilterLeft = listenerLeft.context.createBiquadFilter();
+    lowShelfFilterLeft.type = "lowshelf";
+    lowShelfFilterLeft.frequency.value = 300;
+    lowShelfFilterLeft.connect(listenerLeft.context.destination);
+    var lowShelfFilterRight = listenerRight.context.createBiquadFilter();
+    lowShelfFilterRight.type = "lowshelf";
+    lowShelfFilterRight.frequency.value = 300;
+    lowShelfFilterRight.connect(listenerRight.context.destination);
 
-    var highShelfFilter = listener.context.createBiquadFilter();
-    highShelfFilter.type = "highshelf";
-    highShelfFilter.frequency.value = 5000;
-    highShelfFilter.connect(listener.context.destination);
-
-    var peakingFilter = listener.context.createBiquadFilter();
-    peakingFilter.type = "peaking";
-    peakingFilter.frequency.value = 1000;
-    peakingFilter.connect(listener.context.destination);
+    var highShelfFilterLeft = listenerLeft.context.createBiquadFilter();
+    highShelfFilterLeft.type = "highshelf";
+    highShelfFilterLeft.frequency.value = 5000;
+    highShelfFilterLeft.connect(listenerLeft.context.destination);
+    var highShelfFilterRight = listenerRight.context.createBiquadFilter();
+    highShelfFilterRight.type = "highshelf";
+    highShelfFilterRight.frequency.value = 5000;
+    highShelfFilterRight.connect(listenerRight.context.destination);
+    
+    var peakingFilterLeft = listenerLeft.context.createBiquadFilter();
+    peakingFilterLeft.type = "peaking";
+    peakingFilterLeft.frequency.value = 1000;
+    peakingFilterLeft.connect(listenerLeft.context.destination);
+    var peakingFilterRight = listenerRight.context.createBiquadFilter();
+    peakingFilterRight.type = "peaking";
+    peakingFilterRight.frequency.value = 1000;
+    peakingFilterRight.connect(listenerRight.context.destination);
 
     // needed to compensate for gain in filters
-    var gainNode = listener.context.createGain();
-    gainNode.gain.value= -3;
-    gainNode.connect(listener.context.destination);
+    var gainNodeLeft = listenerLeft.context.createGain();
+    gainNodeLeft.gain.value= -3;
+    gainNodeLeft.connect(listenerLeft.context.destination);
+    var gainNodeRight = listenerRight.context.createGain();
+    gainNodeRight.gain.value= -3;
+    gainNodeRight.connect(listenerRight.context.destination);
 
     //Add Filters to Audio
-    var filters = [peakingFilter, highShelfFilter, lowShelfFilter, gainNode]
+    var filtersLeft = [peakingFilterLeft, highShelfFilterLeft, lowShelfFilterLeft, gainNodeLeft]
+    var filtersRight = [peakingFilterRight, highShelfFilterRight, lowShelfFilterRight, gainNodeRight]
+
     for (let i = 0; i < soundsLeft.length; i++) { 
-        soundsLeft[i].setFilters(filters);
+        soundsLeft[i].setFilters(filtersLeft);
     }
 
     for (let i = 0; i < soundsRight.length; i++) { 
-        soundsRight[i].setFilters(filters);
+        soundsRight[i].setFilters(filtersRight);
     }
       
     // *************************************************************************
 
 
+    // popup loader *************************************************************
+    // function which displays a message on screen, paremeters: message, name of the class of div (for css changes) and whether the message should disappear or not
+    function showPopupMessage(message, className, timeOut) {
+        var popupDiv = document.createElement("div");
+        popupDiv.textContent = message;
+        popupDiv.classList.add(className);
+        document.body.appendChild(popupDiv);
+        if (timeOut){
+            setTimeout(function() {
+                document.body.removeChild(popupDiv);
+            }, 8000);
+        }
+        return popupDiv;
+    }
 
+    // array of classes for popups
+    var loadingClasses = [
+        "general",
+        "knobs",
+        "disk",
+        "cue",
+        "play",
+        "skip",
+        "tempo",
+        "volume"
+    ]
+
+    //loading screen popup
+    showPopupMessage(" ", "loadingScreen", true);
+
+    
+    function helpSlider(){
+        var currentImageIndex = 0;
+        var popupDiv = showPopupMessage(" ", loadingClasses[currentImageIndex], false);
+        var nextButton = document.createElement("button");
+        nextButton.classList.add("next");
+        nextButton.addEventListener("click", function() {
+            currentImageIndex = (currentImageIndex + 1) % loadingClasses.length;
+            popupDiv.className = "";
+            popupDiv.classList.add(loadingClasses[currentImageIndex]);
+        });
+        var prevButton = document.createElement("button");
+        prevButton.classList.add("previous");
+        prevButton.addEventListener("click", function() {
+            currentImageIndex = (currentImageIndex - 1 + loadingClasses.length) % loadingClasses.length;
+            popupDiv.className = "";
+            popupDiv.classList.add(loadingClasses[currentImageIndex]);
+        });
+        var closeButton = document.createElement("button");
+        closeButton.classList.add("close");
+        closeButton.textContent = "x";
+        closeButton.addEventListener("click", function() {
+            document.body.removeChild(popupDiv);
+        });
+        popupDiv.appendChild(nextButton);
+        popupDiv.appendChild(prevButton);
+        popupDiv.appendChild(closeButton);
+    }
+    document.getElementById('helpIcon').addEventListener('click', function() {
+        helpSlider()			
+    });
+
+    // song names displayed at bottom of screen 
+    var rightSongDiv = showPopupMessage(soundsRightNames[soundObjectRight.currentIndex], "right-song", false);
+    var leftSongDiv = showPopupMessage(soundsLeftNames[soundObjectLeft.currentIndex], "left-song", false);  
+    // *************************************************************************
 
 
     // Skip Button *************************************************************
     var skipButtonLeft;
-    var skipButtonLeftX = 0;
+    var skipButtonLeftX = 0.06;
     var skipButtonLeftZ = -0.018;
 
     var skipButtonRight;
-    var skipButtonRightX = -0.982;
+    var skipButtonRightX = -0.922;
     var skipButtonRightZ = -0.018;
 
     loadSkip(skipButtonLeft, skipButtonLeftX, skipButtonLeftZ, soundObjectLeft)
@@ -188,8 +272,8 @@ if ( WebGL.isWebGLAvailable() ) {
                     soundObject.sounds[soundObject.currentIndex].setPlaybackRate(speed);
                     soundObject.sounds[soundObject.currentIndex].setVolume(volume);
                     soundObject.sounds[soundObject.currentIndex].play();
-                    rightSongDiv.textContent = "song playing: " + soundsRightNames[soundObjectRight.currentIndex];
-                    leftSongDiv.textContent = "song playing: " + soundsLeftNames[soundObjectLeft.currentIndex];
+                    rightSongDiv.textContent = soundsRightNames[soundObjectRight.currentIndex];
+                    leftSongDiv.textContent = soundsLeftNames[soundObjectLeft.currentIndex];
                 }
             }
             window.addEventListener('click', onSkipButtonClick, false);
@@ -201,11 +285,11 @@ if ( WebGL.isWebGLAvailable() ) {
 
 
     var previousButtonLeft;
-    var previousButtonLeftX = 0.037;
+    var previousButtonLeftX = 0.097;
     var previousButtonLeftZ = -0.018;
 
     var previousButtonRight;
-    var previousButtonRightX = -0.947;
+    var previousButtonRightX = -0.887;
     var previousButtonRightZ = -0.018;
 
     loadPrevious(previousButtonLeft, previousButtonLeftX, previousButtonLeftZ, soundObjectLeft)
@@ -243,8 +327,8 @@ if ( WebGL.isWebGLAvailable() ) {
                     soundObject.sounds[soundObject.currentIndex].setPlaybackRate(speed);
                     soundObject.sounds[soundObject.currentIndex].setVolume(volume);
                     soundObject.sounds[soundObject.currentIndex].play();
-                    rightSongDiv.textContent = "song playing: " + soundsRightNames[soundObjectRight.currentIndex];
-                    leftSongDiv.textContent = "song playing: " + soundsLeftNames[soundObjectLeft.currentIndex];
+                    rightSongDiv.textContent = soundsRightNames[soundObjectRight.currentIndex];
+                    leftSongDiv.textContent = soundsLeftNames[soundObjectLeft.currentIndex];
                 }
             }
             window.addEventListener('click', onPreviousButtonClick, false);
@@ -258,31 +342,47 @@ if ( WebGL.isWebGLAvailable() ) {
     
 
 
-    // Loading in DJ Deck
+    // Loading in DJ Deck *******************************************************
     var DJDeck;
     const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
     // loading in file
     loader.load( '3D-renderings/Deck-plain-3.glb', function ( gltf ) {
         // adding rendering to scene
         DJDeck = gltf.scene
+        DJDeck.translateX(0.06);
 
         scene.add( DJDeck );
     }, undefined, function ( error ) {
         console.error( error );
     } );
+    // *************************************************************************
 
+
+    // Loading in DJ Deck *******************************************************
+    var background;
+    // loading in file
+    loader.load( '3D-renderings/background6.glb', function ( gltf ) {
+        // adding rendering to scene
+        background = gltf.scene
+        background.translateX(0.06);
+
+        scene.add( background );
+    }, undefined, function ( error ) {
+        console.error( error );
+    } );
     // *************************************************************************
 
 
 
-    // Disk ************************************************************
+
+    // Disk ********************************************************************
     var DJDiskLeft;
-    var DJDiskLeftX = 0.439
+    var DJDiskLeftX = 0.499
     var DJDiskLeftZ = 0.018
     loadDisk(DJDiskLeft, DJDiskLeftX, DJDiskLeftZ, soundObjectLeft)
 
     var DJDiskRight;
-    var DJDiskRightX = -0.545
+    var DJDiskRightX = -0.4843 
     var DJDiskRightZ = 0.021
     loadDisk(DJDiskRight, DJDiskRightX, DJDiskRightZ, soundObjectRight)
 
@@ -321,8 +421,8 @@ if ( WebGL.isWebGLAvailable() ) {
             });
             renderer.domElement.addEventListener('mousemove', function(e) {
                 if (isMouseDown) {
-                    var dx = e.clientX - prevMousePos.x;
-                    DJDisk.rotation.y += dx * 0.01; // Adjust rotation speed as needed
+                    var dy = e.clientY - prevMousePos.y;
+                    DJDisk.rotation.y += dy * 0.01; // Adjust rotation speed as needed
                     prevMousePos.x = e.clientX;
                     prevMousePos.y = e.clientY;
                     // Calculate the change in rotation
@@ -344,7 +444,7 @@ if ( WebGL.isWebGLAvailable() ) {
             console.error( error );
         } );
     }
-    // *************************************************************************
+    // **********************************************************************
 
 
 
@@ -352,34 +452,34 @@ if ( WebGL.isWebGLAvailable() ) {
 
     // knob *****************************************************************
     var knobLeftMid;
-    var knobLeftMidX = -0.001
+    var knobLeftMidX = 0.059
     var knobLeftMidZ = 0.115
-    loadKnob(knobLeftMid, knobLeftMidX, knobLeftMidZ, peakingFilter)
+    loadKnob(knobLeftMid, knobLeftMidX, knobLeftMidZ, peakingFilterLeft)
 
     var knobRightMid;
-    var knobRightMidX = -0.102
+    var knobRightMidX = -0.042
     var knobRightMidZ = 0.113
-    loadKnob(knobRightMid, knobRightMidX, knobRightMidZ, peakingFilter)
+    loadKnob(knobRightMid, knobRightMidX, knobRightMidZ, peakingFilterRight)
 
     var knobRightHigh;
-    var knobRightHighX = -0.102
+    var knobRightHighX = -0.042
     var knobRightHighZ = 0.180
-    loadKnob(knobRightHigh, knobRightHighX, knobRightHighZ, highShelfFilter)
+    loadKnob(knobRightHigh, knobRightHighX, knobRightHighZ, highShelfFilterRight)
     
     var knobLeftHigh;
-    var knobLeftHighX = -0.001
+    var knobLeftHighX = 0.059
     var knobLeftHighZ = 0.180
-    loadKnob(knobLeftHigh, knobLeftHighX, knobLeftHighZ, highShelfFilter)
+    loadKnob(knobLeftHigh, knobLeftHighX, knobLeftHighZ, highShelfFilterLeft)
     
     var knobRightLow;
-    var knobRightLowX = -0.102
+    var knobRightLowX = -0.042
     var knobRightLowZ = 0.045
-    loadKnob(knobRightLow, knobRightLowX, knobRightLowZ, lowShelfFilter)
+    loadKnob(knobRightLow, knobRightLowX, knobRightLowZ, lowShelfFilterRight)
     
     var knobLeftLow;
-    var knobLeftLowX = -0.001
+    var knobLeftLowX = 0.059
     var knobLeftLowZ = 0.045
-    loadKnob(knobLeftLow, knobLeftLowX, knobLeftLowZ, lowShelfFilter)
+    loadKnob(knobLeftLow, knobLeftLowX, knobLeftLowZ, lowShelfFilterLeft)
     
     function mapRange(value, low1, high1, low2, high2) {
         return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
@@ -418,8 +518,8 @@ if ( WebGL.isWebGLAvailable() ) {
     
             renderer.domElement.addEventListener('mousemove', function(e) {
                 if (isMouseDown) {
-                    var dx = e.clientX - prevMousePos.x;
-                    var newRotation = knob.rotation.y + dx * -0.05;
+                    var dy = e.clientY - prevMousePos.y;
+                    var newRotation = knob.rotation.y + dy * 0.05;
                     if (newRotation <= 2.75 && newRotation >= -2.75) {
                         knob.rotation.y = newRotation;
 
@@ -447,12 +547,12 @@ if ( WebGL.isWebGLAvailable() ) {
 
     // Play button ************************************************************
     var playButtonLeft;
-    var playButtonLeftX = -0.015;
+    var playButtonLeftX = 0.045;
     var playButtonLeftZ = -0.022;
     playButton(playButtonLeft, playButtonLeftX, playButtonLeftZ, soundObjectLeft)
 
     var playButtonRight;
-    var playButtonRightX = -0.997;
+    var playButtonRightX = -0.937;
     var playButtonRightZ = -0.022;
     playButton(playButtonRight, playButtonRightX, playButtonRightZ, soundObjectRight)
 
@@ -496,12 +596,12 @@ if ( WebGL.isWebGLAvailable() ) {
 
     // Cue button ************************************************************
     var cueButtonLeft;
-    var cueButtonLeftX = 0.66;
+    var cueButtonLeftX = 0.72;
     var cueButtonLeftZ = -0.181;
     cueButton(cueButtonLeft, cueButtonLeftX, cueButtonLeftZ, soundObjectLeft)
 
     var cueButtonRight;
-    var cueButtonRightX = -0.324;
+    var cueButtonRightX = -0.264;
     var cueButtonRightZ = -0.181;
     cueButton(cueButtonRight, cueButtonRightX, cueButtonRightZ, soundObjectRight)
 
@@ -563,14 +663,15 @@ if ( WebGL.isWebGLAvailable() ) {
     var initialPosition = new THREE.Vector3();
 
     var volumeLeft;
-    var volumeLeftX = -0.0136;
+    var volumeLeftX = 0.0464;
     var volumeLeftZ = 0.002;
     volumeFader(volumeLeft,volumeLeftX, volumeLeftZ, soundObjectLeft)
 
     var volumeRight;
-    var volumeRightX = -0.1134;
+    var volumeRightX = -0.0534;
     var volumeRightZ = 0.002;
     volumeFader(volumeRight,volumeRightX, volumeRightZ, soundObjectRight)
+    var originalGain = [];
 
     function volumeFader (volume, x, z, soundObject){
         loader.load('3D-renderings/volume-riser-left.glb', function ( gltf ) {
@@ -591,6 +692,7 @@ if ( WebGL.isWebGLAvailable() ) {
             function calculateVolume(zPosition, minZ, maxZ) {
                 return (zPosition - minZ) / (maxZ - minZ);
             }
+            var volumeWasZero = false;
             controls.addEventListener('drag', function (event) {
                 event.object.position.x = initialPosition.x;
                 event.object.position.y = initialPosition.y;
@@ -598,6 +700,25 @@ if ( WebGL.isWebGLAvailable() ) {
                 var volumeLevel = calculateVolume(event.object.position.z, minZ, maxZ);
                 soundObject.sounds[soundObject.currentIndex].setVolume(volumeLevel);
                 console.log(soundObject.sounds[soundObject.currentIndex].getVolume());
+                
+                
+                //because the eq filters mess with the volume
+                var filters = soundObject.sounds[soundObject.currentIndex].getFilters();
+                if (volumeWasZero){
+                    volumeWasZero = false;
+                    for (let i = 0; i < filters.length-1; i++){
+                        filters[i].gain.value = originalGain[i];
+                        console.log(originalGain[i]);
+                    }
+                }
+                if (soundObject.sounds[soundObject.currentIndex].getVolume() == 0){
+                    volumeWasZero = true;
+                    //filter.length-1 because the last filter is a gainnode that compensates for loudness and shouldn't be changed.
+                    for (let i = 0; i < filters.length-1; i++){
+                        originalGain[i] = filters[i].gain.value;
+                        filters[i].gain.value = 0;
+                    }
+                }
             });
             // end of Copilot
         }, undefined, function ( error ) {
@@ -619,12 +740,12 @@ if ( WebGL.isWebGLAvailable() ) {
     }
 
     var tempoLeft;
-    var tempoLeftX = -0.0134;
+    var tempoLeftX = 0.0466;
     var tempoLeftZ = -0.006;
     tempoFader(tempoLeft, tempoLeftX, tempoLeftZ, soundObjectLeft)
 
     var tempoRight;
-    var tempoRightX = -0.9897;
+    var tempoRightX = -0.9297;
     var tempoRightZ = -0.006;
     tempoFader(tempoRight, tempoRightX, tempoRightZ, soundObjectRight)
 
@@ -659,33 +780,6 @@ if ( WebGL.isWebGLAvailable() ) {
         } );
     }
     
-    // *************************************************************************
-
-
-
-    // text loader *************************************************************
-    // function which displays a message on screen, paremeters: message, name of the class of div (for css changes) and whether the message should disappear or not
-    function showPopupMessage(message, className, timeOut) {
-        var popupDiv = document.createElement("div");
-        popupDiv.textContent = message;
-        popupDiv.classList.add(className);
-        document.body.appendChild(popupDiv);
-        if (timeOut){
-            setTimeout(function() {
-                document.body.removeChild(popupDiv);
-            }, 4000);
-        }
-        return popupDiv;
-    }
-
-    // message when opening up the program
-    const introMessage = "This is an interactive DJ Controller. Have a look and explore curated music.\nExplore the interactive features through the bright and raised components.";
-    showPopupMessage(introMessage, "popup-message", true);
-
-    // song names displayed at bottom of screen 
-    var rightSongDiv = showPopupMessage("song playing: " + soundsRightNames[soundObjectRight.currentIndex], "right-song", false);
-    var leftSongDiv = showPopupMessage("song playing: " + soundsLeftNames[soundObjectLeft.currentIndex], "left-song", false);  
-
     // *************************************************************************
 
 

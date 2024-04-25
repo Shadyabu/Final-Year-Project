@@ -11,72 +11,123 @@
 	<body>
 		<script type="module" src="/main.js"></script>
 		<script src="https://threejs.org/examples/js/controls/DragControls.js"></script>
-		<img src="41943.png" id="helpIcon" class="help-icon" alt="Help Icon">
+		<img src="images/Help.png" id="helpIcon" class="help-icon" alt="Help Icon">
 		<script>
 			document.getElementById('helpIcon').addEventListener('click', function() {
-				alert('Only the bright and the raised components work. (Disk, tempo, volume, EQ knobs, play, cue, skip and previous)');
+				helpSlider()			
 			});
 		</script>
 	</body>
 
 	<style>
-		#info {
-	position: absolute;
-	top: 10px;
-	width: 100%;
-	text-align: center;
-	z-index: 100;
-	display:block;
-	color:white
-}
-
-	.popup-message {
+	.loadingScreen, .volume, .tempo, .skip, .play, .cue, .disk, .knobs, .general, .left-song, .right-song{
 		position: fixed;
+		text-align: center;
+		color: black;
+		font-family: 'Montserrat';
+	}
+	.volume, .tempo, .skip, .play, .cue, .disk, .general, .knobs{
+		left: 10%;
+		right: 0;
+		top:10%;
+		width: 80%;
+		height: 80%;
+		background-size: cover;
+		z-index: 1;
+		background-color: white;
+	}
+	.loadingScreen{
 		left: 0;
 		right: 0;
-		top: 50%;
-		text-align: center;
-		transform: translateY(-50%);
-		color: black;
-		padding: 20%;
-		font-size: 2em;
-		z-index: 1000;
-		font-family: 'Montserrat';
+		top:0;
+		width: 100%;
+		height: 100%;
+		background-size: cover;
+		z-index: 1;
+		background-color: white;
+	}
+	.general, .loadingScreen{
+		background-image: url('images/general explanation.png');
+	}
+	.knobs{
+		background-image: url('images/knobs explanation.png');
+	}
+	.disk{
+		background-image: url('images/disk explanation.png');
+	}
+	.cue{
+		background-image: url('images/cue explanation.png');
+	}
+	.play{
+		background-image: url('images/play explanation.png');
+	}
+	.skip{
+		background-image: url('images/skip-previous explanation.png');
+	}
+	.tempo{
+		background-image: url('images/tempo explanation.png');
+	}
+	.volume{
+		background-image: url('images/volume explanation.png');
+	}
+	.right-song, .left-song{
+		top: 75%;
+		padding-top: 33px;
+		width:407px;
+		height: 75px;
+		background-image: url('images/songBackground.png');
+    	background-size: cover;
+		font-size: 1.5em;
+		border: 1px solid #333; 
+    	box-shadow: 3px 4px 1px -1px black;
 	}
 	.left-song {
-		position: fixed;
-		left: 0;
-		right: 35%;
-		top: 90%;
-		text-align: center;
-		transform: translateY(-50%);
-		color: black;
-		padding: 3%;
-		font-size: 2em;
-		z-index: 1000;
-		font-family: 'Montserrat';
+		left: 10%;
 	}
 	.right-song {
-		position: fixed;
-		left: 45%;
-		right: 0;
-		top: 90%;
-		text-align: center;
-		transform: translateY(-50%);
-		color: black;
-		padding: 3%;
-		font-size: 2em;
-		z-index: 1000;
-		font-family: 'Montserrat';
+		right: 10%;
 	}
 	.help-icon {
     position: absolute;
     top: 0;
     left: 0;
-    width: 50px; /* Adjust as needed */
-    height: 50px; /* Adjust as needed */
+    width: 50px;
+    height: 50px;
     cursor: pointer;
 	padding: 10px;
+	}
+	.next{
+		right: 2%;
+		position: fixed;
+		top:50%;
+		height:100px;
+		width:100px;
+		background-image: url('images/white-arrow-right.png');
+		background-size: cover;
+		background-color: transparent;
+		border: 0px;
+	}
+	.previous{
+		left: 2%;
+		position: fixed;
+		top:50%;
+		height:100px;
+		width:100px;
+		background-image: url('images/white-arrow-left.png');
+		background-size: cover;
+		background-color: transparent;
+		border: 0px;
+	}
+	.close{
+		right: 0;
+		position: fixed;
+		top:-3%;
+		background-color: transparent;
+		border: 0px;
+		font-size: 90px;
+		font-family: monospace;
+		color: white;
+		-webkit-text-stroke: 3px black;
 	}
 	</style>
 </html>
