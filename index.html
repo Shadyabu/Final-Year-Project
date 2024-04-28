@@ -46,7 +46,10 @@
 		z-index: 1;
 		background-color: white;
 	}
-	.general, .loadingScreen{
+	.general{
+		background-image: url('images/general explanation loading.png');
+	}
+	.loadingScreen{
 		background-image: url('images/general explanation.png');
 	}
 	.knobs{
@@ -99,7 +102,7 @@
 	.next{
 		right: 2%;
 		position: fixed;
-		top:50%;
+		top:45%;
 		height:100px;
 		width:100px;
 		background-image: url('images/white-arrow-right.png');
@@ -110,7 +113,7 @@
 	.previous{
 		left: 2%;
 		position: fixed;
-		top:50%;
+		top:45%;
 		height:100px;
 		width:100px;
 		background-image: url('images/white-arrow-left.png');
@@ -128,6 +131,10 @@
 		font-family: monospace;
 		color: white;
 		-webkit-text-stroke: 3px black;
+	}
+	.close:hover{
+		color: black;
+		-webkit-text-stroke: 3px white;
 	}
 	</style>
 </html>
