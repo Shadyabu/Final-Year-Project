@@ -69,49 +69,49 @@ if ( WebGL.isWebGLAvailable() ) {
     // sound names array
     const soundsRightNames = [
         "Dont Care (prod. ariritfm) - YT",
-        "audioTest2",
-        "audioTest3",
-        "audioTest4",
-        "audioTest5"
+        "BFF - ariritfm",
+        "Raver - ariritfm",
+        "tiffany - shadybabey",
+        "what it do (prod. shadybabey)- lc levi"
     ]
     const soundsLeftNames = [
         "tiffany - shadybabey",
-        "audioTest2",
-        "audioTest3",
-        "audioTest4",
-        "audioTest5"
+        "what it do (prod. shadybabey)- lc levi",
+        "Raver - ariritfm",
+        "Dont Care (prod. ariritfm) - YT",
+        "BFF - ariritfm"
     ]
 
     // load sounds into arrays
     audioLoader.load('songs/Dont Care (prod ariritfm).mp3', function(buffer) {
         soundsRight[0].setBuffer(buffer);
     });
-    audioLoader.load('/audioTest2.mp3', function(buffer) {
+    audioLoader.load('songs/Ariri  - BFF (320 kbps).mp3', function(buffer) {
         soundsRight[1].setBuffer(buffer);
     });
-    audioLoader.load('/audioTest3.mp3', function(buffer) {
+    audioLoader.load('songs/raver (feat. How to Loot Brazil) (320 kbps).mp3', function(buffer) {
         soundsRight[2].setBuffer(buffer);
     });
-    audioLoader.load('/audioTest4.mp3', function(buffer) {
+    audioLoader.load('songs/"tiffany" - 143bpm Cmin - (@shady_._._).mp3', function(buffer) {
         soundsRight[3].setBuffer(buffer);
     });
-    audioLoader.load('/audioTest5.mp3', function(buffer) {
+    audioLoader.load('songs/LC LEVI - *WHAT IT DO* (prod midas x shady).mp3', function(buffer) {
         soundsRight[4].setBuffer(buffer);
     });
 
     audioLoader.load('songs/"tiffany" - 143bpm Cmin - (@shady_._._).mp3', function(buffer) {
         soundsLeft[0].setBuffer(buffer);
     });
-    audioLoader.load('/audioTest2.mp3', function(buffer) {
+    audioLoader.load('songs/LC LEVI - *WHAT IT DO* (prod midas x shady).mp3', function(buffer) {
         soundsLeft[1].setBuffer(buffer);
     });
-    audioLoader.load('/audioTest3.mp3', function(buffer) {
+    audioLoader.load('songs/raver (feat. How to Loot Brazil) (320 kbps).mp3', function(buffer) {
         soundsLeft[2].setBuffer(buffer);
     });
-    audioLoader.load('/audioTest4.mp3', function(buffer) {
+    audioLoader.load('songs/Dont Care (prod ariritfm).mp3', function(buffer) {
         soundsLeft[3].setBuffer(buffer);
     });
-    audioLoader.load('/audioTest5.mp3', function(buffer) {
+    audioLoader.load('songs/Ariri  - BFF (320 kbps).mp3', function(buffer) {
         soundsLeft[4].setBuffer(buffer);
     });
 
@@ -808,7 +808,7 @@ if ( WebGL.isWebGLAvailable() ) {
             console.error( error );
         } );
     }
-    
+
     // *************************************************************************
 
 
